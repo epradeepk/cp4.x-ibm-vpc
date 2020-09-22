@@ -1,0 +1,30 @@
+- name: get list of VMs
+  virt:
+      command: "list_vms"
+  register: vms
+
+- debug: msg="VMs: {{ item }}
+  with_dict: "{{ vms.stdout }}”
+
+- name: start vm
+  virt:
+      name: "{{ item }}"
+      state: running
+  with_dict: "{{ vms.stdout }}”
+
+- name: Change Directory
+  chdir: ~/ocp-install
+
+- name: Run bootstrap
+  command: openshift-install --dir=. wait-for bootstrap-complete —log-level=debug
+  register: bootstrap_status
+  until: ("DEBUG Bootstrap status: complete" in bootstrap_status.stdout)
+  retries: “{{ bootstrap_status_wait_retries }}”
+  delay: “{{ bootstrap_status_wait_delay }}”
+
+- name: Restart gobetween
+  systemd:
+    state: restart
+    enabled: yes
+    name: gobetween
+

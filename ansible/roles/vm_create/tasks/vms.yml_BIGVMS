@@ -1,0 +1,42 @@
+---
+#vm_location: "/data/VMs"
+
+guests:
+  bootstrap:
+    #mem: 16384
+    size: 80G
+    mem: 16000
+    cpus: 4
+    mac: 52:54:00:02:85:01
+    file_type: qcow2
+  master1:
+    mem: 65536
+    size: 180G
+    cpus: 6
+    mac: 52:54:00:02:86:01
+    file_type: qcow2
+  master2:
+    mem: 65536
+    size: 180G
+    cpus: 6
+    mac: 52:54:00:02:86:02
+    file_type: qcow2
+  master3:
+    mem: 65536
+    size: 180G
+    cpus: 6
+    mac: 52:54:00:02:86:03
+    file_type: qcow2
+  worker1:
+    mem: 65536
+    size: 180G
+    cpus: 4
+    mac: 52:54:00:02:87:01
+    file_type: qcow2
+  worker2:
+    mem: 65536
+    size: 180G
+    cpus: 4
+    mac: 52:54:00:02:87:02
+    file_type: qcow2
+

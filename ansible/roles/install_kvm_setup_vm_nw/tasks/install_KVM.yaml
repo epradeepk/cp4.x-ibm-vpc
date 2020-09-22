@@ -1,0 +1,64 @@
+- name: Ansible copy directory to the remote server
+  copy:
+      src: "{{ ansible_files_dir_local }}/files/"
+      dest: "{{ ansible_files_dir_remote }}/files/"
+       
+- name: Install a list of packages
+  apt:
+   name: "{{ item }}"
+   update_cache: yes
+   state: present
+  with_items:
+    - 'qemu'
+    - 'qemu-kvm'
+    - 'libvirt-bin'
+    - 'libosinfo-bin'
+    - 'bridge-utils'
+    - 'virt-manager'
+    - 'uvtool'
+
+- name: Make sure libvirtd service is running
+  systemd:
+    state: started
+    enabled: yes
+    name: libvirtd
+
+- name: Install the basic ubuntu image (Bionic Beaver) for uvtool to create the load balancer and nfs server from
+  shell: uvt-simplestreams-libvirt --verbose sync release=bionic arch=amd64
+
+#- name: Remove ~/.ssh/id_rsa* if already exists
+#  shell:  rm -rf ~/.ssh/id_rsa*
+#
+#- name: Create the key for the metal root user to use to access the VMs on the host machine command line
+#  shell: ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -N "" 
+
+#- name: cat ~/.ssh/id_rsa.pub
+#  shell: cat ~/.ssh/id_rsa.pub
+#  register: sshkey
+  
+#- name: Add sshkey to install-config.yaml 
+#  replace:
+#    path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+#    regexp: 'BASE-VM-SSH-PUBLIC-KEY'
+#    replace: "{{ item }}"
+#  with_items: "{{ sshkey.stdout }}"
+
+
+#- name: Add pull secret to install-config.yaml
+#  replace:
+#    path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+#    regexp: 'YOUR-PULL-SECRET'
+#    replace: "{{ pull_secret }}"
+
+#- name: Add cluster name to install-config.yaml
+#  replace:
+#    path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+#    regexp: 'example.com'
+#    replace: "{{ cluster_name }}"
+
+#- name: Add domain name to install-config.yaml
+#  replace:
+#    path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+#    regexp: 'mycluster'
+#    replace: "{{ cluster_name }}"
+

@@ -1,0 +1,61 @@
+ansible_python_interpreter: /usr/bin/python3
+#ansible_python_interpreter: /usr/bin/python
+force_apt_get: True
+
+domain_name: "example.com"
+cluster_name: "mycluster"
+host_name: "{{ cluster_name }}.{{ domain_name }}"
+
+ssh_key: "BASE-VM-SSH-PUBLIC-KEY"
+pull_secret: 'YOUR-PULL-SECRET'
+
+# For VMs created from cloud UI - block_storage: "/dev/vdb"
+# For VMs created from terraform - block_storage: "/dev/vdd"
+block_storage: "/dev/vdd"
+
+delay: 5
+retries: 5
+bootstrap_status_wait_retries: 18
+bootstrap_status_wait_delay: 180
+dns_server: "/etc/resolv.conf"
+
+ansible_files_dir_local: "{{ ansible_env.HOME }}/ocp4.x-ibm-vpc/ansible
+ansible_files_dir_remote: /root/ocp4.5
+haproxy_cfg_file_path: /etc/haproxy/haproxy.cfg
+
+# defaults file for DNSMasq
+tftp_create_dir: /var/lib
+tftp_copy_files: /usr/lib/ipxe/{undionly.kpxe,ipxe.efi}
+
+matchbox_download_dir: "{{ ansible_env.HOME }}/matchbox"
+matchbox_url: "https://github.com/poseidon/matchbox/releases/download/v{{ matchbox_version }}/matchbox-v{{ matchbox_version }}-linux-amd64.tar.gz"
+matchbox_version: 0.8.3
+matchbox_src: "matchbox-v{{ matchbox_version }}-linux-amd64"
+matchbox_executable_dir: /usr/local/bin/
+matchbox_files_dir: /var/lib/matchbox
+matchbox_ocp_files_dir: "{{ ansible_env.HOME }}/ocp4x-on-ibm-public-cloud/files/matchbox"
+
+rcos_initramfs_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-installer-initramfs.x86_64.img"
+rcos_kernel_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-installer-kernel-x86_64"
+rcos_metal_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-metal.x86_64.raw.gz"
+
+openshift_client_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.5/openshift-client-linux.tar.gz"
+
+#openshift_client_dir: "{{ ansible_env.HOME }}/openshift_client"
+openshift_client_dir: "/root/openshift_client"
+openshift_install_dir: "/root/openshift-install"
+ocp_install_install_dir: "/root/ocp-install"
+openshift_executable_dir: /usr/local/bin/
+openshift_linux_installer_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.5/openshift-install-linux.tar.gz"
+ocp_install_config: "/root/ocp4x-on-ibm-public-cloud/files"
+
+ocp_files: "/root/ocp4x-on-ibm-public-cloud/files"
+ocp_hostname: "ocpserver.bluemix.net"
+gobetween_download_dir: "{{ ansible_env.HOME }}/gobetween"
+haproxy_download_dir: "{{ ansible_env.HOME }}/haproxy"
+gobetween_url: "https://github.com/yyyar/gobetween/releases/download/{{ gobetween_version }}/gobetween_{{ gobetween_version }}_linux_amd64.tar.gz"
+gobetween_version: 0.7.0
+gobetween_configuration_dir: /etc/gobetween
+haproxy_configuration_dir: /etc/haproxy
+ocp_executable_dir: /usr/local/bin/
+

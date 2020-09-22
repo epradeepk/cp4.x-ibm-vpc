@@ -1,0 +1,37 @@
+- name: Run a script using an executable in a system path
+  script: ./update_vars.py
+  args:
+    executable: python3
+
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Install a list of packages
+  apt: 
+   name: "{{ item }}"
+   update_cache: yes
+   state: present
+   force_apt_get: yes
+  with_items:
+    - 'net-tools' 
+    - 'curl' 
+    - 'nano' 
+    - 'tree'
+    - 'wget' 
+    - 'jq' 
+    - 'nfs-common'
+    - 'cpu-checker'
+
+- name: Display if Virtualization is installed
+  command: kvm-ok
+  register: kvmoutput
+  failed_when: '"INFO: /dev/kvm exists" not in kvmoutput.stdout'
+
+- name: Set host name
+  command: hostnamectl set-hostname "{{ host_name }}" 
+
+# Display Cluster, Domain and Host names
+- debug: msg='Cluster "{{ cluster_name }}" Domain "{{ domain_name }}" Host "{{ host_name }}" '

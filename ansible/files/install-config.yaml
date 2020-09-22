@@ -1,0 +1,30 @@
+apiVersion: v1
+baseDomain: example.com
+compute:
+- hyperthreading: Enabled
+  name: worker
+  # must be 0 for user provisioned infra as cluster will not create these workers
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: mycluster
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  networkType: OpenShiftSDN
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+
+
+## The pull secret that provides components in the cluster access to images for OpenShift components.
+pullSecret: 'YOUR-PULL-SECRET'
+
+
+## The default SSH key that will be programmed for `core` user.
+sshKey: 'BASE-VM-SSH-PUBLIC-KEY'

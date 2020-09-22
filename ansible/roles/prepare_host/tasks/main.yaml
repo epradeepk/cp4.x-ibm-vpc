@@ -1,0 +1,15 @@
+- name:
+  block:
+  
+  - name: Display all files under /root/ocp-install
+    shell: "ls -l /root"
+    register: outp
+
+  - debug: var=outp.stdout_lines
+
+  - include: initial_install.yaml
+
+  rescue:
+
+  - fail:
+       msg: "Failed Initial Install Process"

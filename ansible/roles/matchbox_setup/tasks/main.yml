@@ -1,0 +1,116 @@
+###### Debug 1
+#- name: Ansible copy directory to the remote server
+#  copy:
+#      src: "{{ ansible_files_dir_local }}/files/"
+#      dest: "{{ ansible_files_dir_remote }}/files/"
+
+
+- name: Ensure download and install dir exist
+  file:
+      path: "{{ matchbox_download_dir }}"
+      state: directory
+
+- name: Download Matchbox
+  get_url:
+        url: "{{ item }}"
+        dest: "{{ matchbox_download_dir }}"
+  with_items:
+        - "{{ matchbox_url }}"
+
+- name: Unpack release tarball
+  unarchive:
+        src: "{{ matchbox_download_dir }}/matchbox-v{{ matchbox_version }}-linux-amd64.tar.gz"
+        dest: "{{ matchbox_download_dir }}"
+        remote_src: yes
+
+- name: Copy pre-built Matchbox executable
+  copy:
+       src: "{{ matchbox_download_dir }}/{{ matchbox_src }}/matchbox"
+       dest: "{{ matchbox_executable_dir }}/matchbox"
+       mode: 0755 #### Debug 1
+       remote_src: yes
+  become: yes
+
+- name: Copy Matchbox systemd file
+  copy:
+       src: "{{ matchbox_download_dir }}/{{ matchbox_src }}/contrib/systemd/matchbox-local.service"
+       dest: /etc/systemd/system/matchbox.service
+       remote_src: yes
+  become: yes
+   
+- name: Create Matchbox group
+  group:
+       name: matchbox
+       state: present
+  become: yes
+
+- name: Create Matchbox user
+  user:
+       name: matchbox
+       group: matchbox
+       state: present
+  become: yes
+
+- name: create directory if they don't exist
+  file:
+        path: "{{ item }}"
+        state: directory
+        owner: matchbox
+        group: matchbox
+        mode: 0775
+  with_items:
+        - "{{ matchbox_files_dir }}/assets"
+        - "{{ matchbox_files_dir }}/groups"
+        - "{{ matchbox_files_dir }}/ignition"
+        - "{{ matchbox_files_dir }}/profiles"
+
+- name: "Enable and start matchbox service"
+  systemd:
+    name: matchbox
+    state: started
+    enabled: yes
+
+
+- name: Download RHCOS Files
+  get_url:
+        url: "{{ item }}"
+        dest: "{{ matchbox_files_dir }}/assets"
+  with_items:
+        - "{{ rcos_initramfs_url }}"
+        - "{{ rcos_kernel_url }}"
+        - "{{ rcos_metal_url }}"
+
+- name: Copy OCP profile files
+  copy:
+        #src: "{{ matchbox_ocp_files_dir }}/profiles/"
+        src: "{{ ansible_files_dir_remote }}/files/matchbox/profiles/"
+        dest: "{{ matchbox_files_dir }}/profiles/"
+        remote_src: yes
+  become: yes
+
+- name: Copy OCP group files
+  copy:
+        #src: "{{ matchbox_ocp_files_dir }}/groups/"
+        src: "{{ ansible_files_dir_remote }}/files/matchbox/groups/"
+        dest: "{{ matchbox_files_dir }}/groups/"
+        remote_src: yes
+  become: yes
+    
+- name: "Replace hostname names in profiles"
+  replace: 
+        path: "{{ matchbox_files_dir }}/profiles/{{ item }}.json"
+        regexp: 'mycluster.example.com'
+        replace: '{{ host_name }}'
+  with_items:
+         - "bootstrap"
+         - "worker"
+         - "master"
+  become: yes
+
+- name: Change ownership of /var/lib/matchbox
+  file:
+    path: "{{ matchbox_files_dir }}"
+    state: directory
+    owner: matchbox
+    group: matchbox
+

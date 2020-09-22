@@ -1,0 +1,37 @@
+- name: "Remove file /root/ocp-install/.openshift_install.log"
+  file:
+    path: /root/ocp-install/.openshift_install.log
+    state: absent
+
+- name: Run INSTALL
+  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for install-complete"
+
+- name: Validate logs mesg
+  shell: cat /root/ocp-install/.openshift_install.log
+  register: output_status
+  until: '"Install complete" in output_status.stdout'
+  retries: "{{ bootstrap_status_wait_retries }}"
+  delay: "{{ bootstrap_status_wait_delay }}"
+  ignore_errors: true
+
+- debug: msg="cat /root/ocp-install/.openshift_install.log"
+
+- name: Set kubeconfig
+  shell: export KUBECONFIG=/root/ocp-install/auth/kubeconfig
+
+- name: Display ocr
+  shell: oc get csr 
+  register: ouptput_csr
+
+- debug: msg='echo "OCR INFO";echo {{ ouptput_csr.stdout }}'
+
+- name: Approve
+  shell: oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+  ignore_errors: true
+
+- name: Display ocr
+  shell: oc get csr 
+  register: ouptput_csr
+
+- debug: msg='echo "OCR INFO";echo {{ ouptput_csr.stdout }}'
+  ignore_errors: true

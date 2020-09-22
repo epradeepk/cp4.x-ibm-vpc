@@ -1,0 +1,18 @@
+---
+- name:
+  block:
+  - include_vars: vms.yml
+
+  - name: create volumes
+    command: >
+              virsh vol-create-as secondary {{ item.key }}.{{ item.value.file_type }} {{ item.value.size }}
+    with_dict: "{{ guests }}"
+
+  - name: create vm
+    command: >
+              virt-install --name={{ item.key }} --ram={{ item.value.mem }} --vcpus={{ item.value.cpus }} --mac={{ item.value.mac }} \
+              --disk path=/mnt/secondary/{{ item.key }}.{{ item.value.file_type }},bus=virtio \
+              --pxe --noautoconsole --graphics=vnc --hvm \
+              --network=bridge:br-ocp,model=virtio --boot hd,network --os-variant rhel7
+    with_dict: "{{ guests }}"
+

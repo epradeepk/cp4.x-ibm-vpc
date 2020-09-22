@@ -1,0 +1,65 @@
+---
+
+# tasks file for vol
+
+- name: check the existing partition information on the remote machine 
+  become: true
+  shell: df -Th
+  register: df_output
+
+- name: get the fdisk info on the remote machine 
+  become: true
+  shell: fdisk -l 
+
+- name: check if /dev/vdb already exists
+  shell: if grep "/dev/vdb" df_output.stdout
+
+- name: make the file system  on the remote machine 
+  become: true
+  shell: mkfs.ext4 "{{ block_storage }}"
+ 
+
+#- name: "create directory if they dont exist to mount a volume  "
+  file:
+    path: /mnt/secondary
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+
+#- name: mount /mnt/secondary
+  shell: mount "{{ block_storage }}" /mnt/secondary
+
+- name: To find the UUID of the partition 
+  become: true
+  shell: blkid "{{ block_storage }}" -sUUID -ovalue
+  register: UUID 
+
+- name: Add mount to /etc/fstab
+  lineinfile:
+    dest: /etc/fstab
+    line: '/dev/disk/by-uuid/{{UUID.stdout}} /mnt/secondary ext4 defaults 0 0'
+
+- name: Verify if block_storage is mounted
+  command:  mount
+  register: mount_output
+  failed_when: '"{{ block_storage }}" not in mount_output.stdout'
+
+- name: Create volume secondary
+  become: true
+  shell: virsh pool-define-as --name secondary --type dir --target /mnt/secondary
+  ignore_errors: true
+
+- name: Set volume secondary for auto start
+  become: true
+  shell: virsh pool-autostart secondary 
+
+- name: Start volume secondary
+  become: true
+  shell: virsh pool-start secondary
+
+- name: Verify if volume secondary is created
+  command:  virsh pool-list
+  register: virsh_output
+  failed_when: '"secondary" not in virsh_output.stdout'
+

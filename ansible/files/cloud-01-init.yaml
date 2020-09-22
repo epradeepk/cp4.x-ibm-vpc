@@ -1,0 +1,4 @@
+        addresses: [REPLACE_IPADDRESS/24]
+        nameservers:
+          addresses:
+            - REPLACE_DNSADDRESS

@@ -1,0 +1,16 @@
+[Unit]
+Description=Gobetween - modern LB for cloud era
+Documentation=https://github.com/yyyar/gobetween/wiki
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/gobetween.pid
+#ExecStartPre=prestart some command
+ExecStart=/usr/local/bin/gobetween -c /etc/gobetween/gobetween.toml
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

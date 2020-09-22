@@ -1,0 +1,145 @@
+########################################################
+# Playbooks: Openshift Installer install & Configuration
+########################################################
+
+- name: Ensure download and openshift client/installer dir exist
+  file:
+      path: "{{ item }}"
+      state: directory
+  with_items:
+        - "{{ openshift_client_dir }}"
+        - "{{ openshift_install_dir }}"
+        - "{{ ocp_install_install_dir }}"
+
+- name: Download openshift client
+  get_url:
+      url: "{{ item }}"
+      dest: "{{ openshift_client_dir }}"
+  with_items:
+     - "{{ openshift_client_url }}"
+
+- name: Unpack openshift client tarball
+  unarchive:
+       src: "{{ openshift_client_dir }}/openshift-client-linux.tar.gz"
+       dest: "{{ openshift_client_dir }}"
+       remote_src: yes
+
+- name: Copy openshift executable files
+  copy:
+      src: "{{ openshift_client_dir }}/{{ item }}"
+      dest: "{{ openshift_executable_dir }}/{{ item }}"
+      mode: 0755 
+      remote_src: yes
+  with_items:
+      - "oc"
+      - "kubectl"
+  become: yes
+
+- name: Download openshift installer
+  get_url:
+      url: "{{ item }}"
+      dest: "{{ openshift_install_dir }}"
+  with_items:
+      - "{{ openshift_linux_installer_url }}"
+    
+- name: Unpack openshift installer tarball
+  unarchive:
+       src: "{{ openshift_install_dir }}/openshift-install-linux.tar.gz"
+       dest: "{{ openshift_install_dir }}"
+       remote_src: yes
+
+- name: Copy openshift executable installer
+  copy:
+       src: "{{ openshift_install_dir }}/{{ item }}"
+       dest: "{{ openshift_executable_dir }}/{{ item }}"
+       mode: 0755
+       remote_src: yes
+  with_items:
+       - "openshift-install"
+  become: yes
+
+#### Debug 1
+#- name: Ansible copy directory to the remote server
+#  copy:
+#      src: "{{ ansible_files_dir_local }}/files/"
+#      dest: "{{ ansible_files_dir_remote }}/files/"
+
+- name: Copy openshift config file
+  copy:
+       src: "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+       dest: "{{ ocp_install_install_dir }}/install-config.yaml"
+       remote_src: yes
+  become: yes
+
+
+- name: Add cluster name to install-config.yaml
+  replace:
+    #path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+    path: "{{ ocp_install_install_dir }}/install-config.yaml"
+    regexp: 'example.com'
+    replace: "{{ domain_name }}"
+
+- name: Create the key for the metal root user to use to access the VMs on the host machine command line
+  shell: 'ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -N "" <<<n'
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+
+- name: cat ~/.ssh/id_rsa.pub
+  shell: cat ~/.ssh/id_rsa.pub
+  register: sshkey
+
+- name: Add sshkey to install-config.yaml
+  replace:
+    #path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+    path: "{{ ocp_install_install_dir }}/install-config.yaml"
+    regexp: BASE-VM-SSH-PUBLIC-KEY
+    replace: "{{ sshkey.stdout }}"
+  #with_items: "{{ sshkey.stdout }}"
+
+- debug: msg="echo {{ sshkey.stdout }}"
+
+# Modify install-config.yaml file content as needed
+- name: Add pull secret to install-config.yaml
+  replace:
+    #path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+    path: "{{ ocp_install_install_dir }}/install-config.yaml"
+    regexp: YOUR-PULL-SECRET
+    replace: "{{ pull_secret }}"
+
+- name: Add domain name to install-config.yaml
+  replace:
+    #path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
+    path: "{{ ocp_install_install_dir }}/install-config.yaml"
+    regexp: 'mycluster'
+    replace: "{{ cluster_name }}"
+
+
+### COMMENT 1
+- name: Execute a command using the shell module
+  shell: openshift-install create ignition-configs
+  args:
+      chdir: "{{ ocp_install_install_dir }}"
+      executable: /bin/bash
+  become: true
+
+
+### COMMENT 2
+- name: Copy ignition-configs files
+  copy:
+      src: "{{ ocp_install_install_dir }}/"
+      dest: "{{ matchbox_files_dir }}/ignition/"
+      remote_src: yes
+  become: yes
+
+#- name: Remove unwanted directories
+#  file:
+#       path: "{{ item }}"
+#       state: absent
+#  with_items:
+#       - "{{ matchbox_files_dir }}/ignition/auth"
+#       - "{{ matchbox_files_dir }}/ignition/metadata.json"
+#       - "/root/openshift_client"
+#       - "/root/openshift-install"
+#       - "/root/ocp-install"
+

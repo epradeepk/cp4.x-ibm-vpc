@@ -1,0 +1,16 @@
+
+- name: Create net_ocp.xml network, start it and have it autostart  
+  shell: {{ item }}
+  with_items:
+  - virsh net-define net_ocp.xml
+  - virsh net-autostart ocp
+  - virsh net-start ocp
+
+- name: Make sure libvirtd service is running
+  systemd:
+    state: restarted
+    enabled: yes
+    name: libvirt-bin
+
+- name: Verify existence of network
+  shell: ifconfig  br-ocp

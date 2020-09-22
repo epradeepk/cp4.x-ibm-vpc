@@ -1,0 +1,42 @@
+
+- name: get list of VMs
+  vars:
+      ansible_python_interpreter: '/usr/bin/python'
+  virt:
+       command: "list_vms"
+  register: vms
+
+
+- name: 'Wait until All VMs goes to "shut off" state'
+  block:
+    - name: Set the retry count
+      set_fact:
+        retry_count: "{{ 0 if retry_count is undefined else retry_count|int + 1 }}"
+
+    - name: "Remove file vms_state.txt"
+      file:
+        path: /root/vms_state.txt
+        state: absent
+
+    - name: VMs state
+      shell: virsh domstate {{ item }} >> vms_state.txt
+      with_items: "{{ vms.list_vms }}"
+
+    - name: Check the file content
+      shell:  if grep "running" /root/vms_state.txt; then false; else echo "DONE";fi
+
+  rescue:
+
+    #- fail:
+    #    msg: Ended after 20 retries..total 10 mins time-out
+    #  when: retry_count|int == 20
+
+    - debug:
+        msg: "Failed to find shut off for all the VMs - Retrying..."
+    - name: sleep for 60 seconds
+      shell: sleep 60
+
+    - include_tasks: vms_state.yml
+      when: retry_count|int != 10
+
+

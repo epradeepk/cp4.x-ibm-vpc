@@ -1,0 +1,90 @@
+---
+# tasks file for DNSMasq
+
+- name: "Install a list of packages for DNSMasq ,iPXE server and TFTP"
+  apt: 
+   name: "{{ item }}"
+   update_cache: yes
+   state: present
+  with_items:
+    - 'dnsmasq' 
+    - 'ipxe' 
+
+- name: "Enable dnsmasq and reload daemon"
+  systemd:
+    name: dnsmasq
+    state: started
+    enabled: yes
+
+- name: "create directory if they dont exist for ipxe "
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: dnsmasq
+    group: nogroup
+    mode: 0775
+  with_items:
+  - "{{ tftp_create_dir }}/tftp"
+
+- name: "Copy ipxe file "
+  copy:
+    src: "/usr/lib/ipxe/{{item}}"
+    dest: "{{ tftp_create_dir }}/tftp"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0775
+  with_items:
+    - undionly.kpxe
+    - ipxe.efi
+
+#### DEBUG 1
+- name: Set up permissions
+  shell: chown dnsmasq:nogroup /var/lib/tftp/*
+
+- name: "stat dnsmasq"
+  stat: path=/etc/dnsmasq.conf
+  register: dnsmasq_stat
+
+- name: "COPY  the dnsmasq original file" 
+  command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+  when: dnsmasq_stat.stat.exists
+
+- name: "Copy openshift config file"
+  copy:
+    src: "{{ ansible_files_dir_local }}/files/dnsmasq/dnsmasq.conf"
+    dest: "/etc/dnsmasq.conf"
+    #owner: root
+    #group: root
+    mode: 0775   #### DEBUG 1
+
+- name: "Remove file (/var/lib/misc/dnsmasq.leases )"
+  file:
+    path: /var/lib/misc/dnsmasq.leases 
+    state: absent
+
+#- name: "create an empty file for (/var/lib/misc/dnsmasq.leases )"
+#  file:
+#    path: /var/lib/misc/dnsmasq.leases 
+#    state: touch
+#    mode: u=rw,g=r,o=r
+
+#### DEBUG 1
+- name: Create empty file
+  shell: touch /var/lib/misc/dnsmasq.leases 
+
+
+- name: Replace the host name in /etc/dnsmasq.conf
+  replace:
+    path:  /etc/dnsmasq.conf
+    regexp: 'mycluster.example.com'
+    replace: "{{ item }}"
+  with_items: "{{ host_name }}"
+
+- name: Enable dnsmasq and reload daemon
+  systemd:
+    name: dnsmasq
+    state: restarted
+    enabled: yes
+
+

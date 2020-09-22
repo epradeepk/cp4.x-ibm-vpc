@@ -1,0 +1,184 @@
+---
+# tasks file for nameservers
+
+####### Debug 1
+#- name: Ansible copy directory to the remote server
+#  copy:
+#      src: "{{ ansible_files_dir_local }}/files/"
+#      dest: "{{ ansible_files_dir_remote }}/files/"
+
+
+# MODIFY
+# RUN AUTOMATE STEP#4 (Automation BM to VM)
+# Edit the existing file in /etc/netplan/*.yaml (as file name may vary) and update it with the content mentioned in the BM to VM simulation file cloud-init.yaml
+
+#- name: Remove if cloud-init.yaml exists in /etc/plan directory
+#  file: 
+#   path: /etc/plan/cloud-init.yaml
+#   state: absent
+#  ignore_errors: true
+
+#- name: Replace the file content
+#  shell: ls /etc/netplan/*.yaml
+#  register: filecontent
+
+#- name: Copy cloud-init.yaml
+#  copy:
+#   src: "{{ ansible_files_dir_local }}/files/cloud-init.yaml"
+#   dest: /etc/netplan
+  
+#- name: Replace
+#  command: cp /etc/netplan/cloud-init.yaml {{ item }}
+#  with_items: "{{ filecontent.stdout }}"
+
+#- name: Create a directory for backup
+#  file:
+#     path: /etc/netplan/netplan.backup
+#     state: directory
+
+
+# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
+##### START
+- name: Get the file name
+  shell: "ls /etc/netplan/*.yaml"
+  register: filename
+
+- name: Copy file and set up the permission and owner of the file 
+  copy:
+    src: "{{ filename.stdout }}"
+    dest: "{{ filename.stdout }}.bak"
+    remote_src: yes
+    #mode: 0755     #### Debug 1
+    force: no
+
+- debug: msg={{ filename.stdout }}
+
+- name: Modify /etc/netplan/*.yaml 
+  replace:
+    path:  "{{ filename.stdout }}"
+    regexp: 'ens3'
+    replace: "eth0"
+
+- name: Append extra content to /etc/netplan/*.yaml file
+  #shell: cat {{ ansible_files_dir_remote }}/files/cloud-01-init.yaml >> "{{ filename.stdout }}"
+  shell: 'if grep eth0 {{ filename.stdout }}; then true; else cat {{ ansible_files_dir_remote }}/files/cloud-01-init.yaml >> {{ filename.stdout }};fi'
+
+# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
+###### END
+
+- name: Ansible copy  cloud-init.yaml to the remote server
+  copy:
+      src: "{{ ansible_files_dir_remote }}/files/cloud-init.yaml"
+      dest: "{{ filename.stdout }}"
+      remote_src: yes
+
+- name: Fetch IP address - ens3
+  shell: ip addr show ens3 | awk '/inet/ {print $2}' | cut -d/ -f1 | head -1
+  register: IP_ENS3
+
+- name: Fetch IP addressa - eth0
+  shell: ip addr show eth0 | awk '/inet/ {print $2}' | cut -d/ -f1 | head -1
+  register: IP_ETH0
+
+- name: Fetch IP address - eth0
+  #shell: if [ {{ IP_ENS3.stdout }}  == "Device "ens3" does not exist" ]; then echo {{ IP_ETH0.stdout }}; else echo {{ IP_ENS3.stdout }}; fi
+  shell: if [ {{ IP_ENS3.stdout }} ]; then echo {{ IP_ENS3.stdout }}; else echo {{ IP_ETH0.stdout }}; fi
+  #when:  "'does not exist' in IP.stdout"
+  register: IP
+
+- debug: msg={{ IP_ENS3.stdout }}
+- debug: msg={{ IP_ETH0.stdout }}
+- debug: msg={{ IP.stdout }}
+
+- name: Fetch mac address
+  shell: ip addr show ens3 | awk '/ether/ {print $2}' | cut -d/ -f1
+  register: MAC_ENS3
+
+- name: Fetch mac address
+  shell: ip addr show eth0 | awk '/ether/ {print $2}' | cut -d/ -f1
+  register: MAC_ETH0
+
+- name: Fetch MAC address from ens3/eth0
+  shell: if [ {{ MAC_ENS3.stdout }} ]; then echo {{ MAC_ENS3.stdout }}; else echo {{ MAC_ETH0.stdout }}; fi
+  #when:  "'does not exist' in IP.stdout"
+  register: MAC
+
+
+- name: Fetch DNS server address
+  shell: cat "{{ dns_server }}" | grep -v '^#' | grep nameserver | awk '{print $2}'
+  register: DNS
+
+- name: Set variables
+  set_fact:
+      HOST_IP_ADDRESS: "{{ IP.stdout }}"
+      HOST_MAC_ADDRESS: "{{ MAC.stdout }}"
+      HOST_DNS_ADDRESS: "{{ DNS.stdout }}"
+
+- name: "Replace IPaddress in network init file"
+  replace:
+      path: "{{ filename.stdout }}"
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+  with_items:
+      - { regexp: 'REPLACE_IPADDRESS', replace: "{{ HOST_IP_ADDRESS }}" }
+      - { regexp: 'REPLACE_MACADDRESS', replace: "{{ HOST_MAC_ADDRESS }}" }
+      - { regexp: 'REPLACE_DNSADDRESS', replace: "{{ HOST_DNS_ADDRESS }}" }
+  become: yes
+
+###### Debug 123
+- name: Add Private IP to /etc/hosts file
+  #shell: 'echo  "{{ HOST_IP_ADDRESS }}" "{{ host_name }}" >> /etc/hosts'
+  shell: 'if grep "{{ host_name }}" /etc/hosts; then true; else echo   "{{ HOST_IP_ADDRESS }}"  "{{ host_name }}" >> /etc/hosts;fi'
+
+# RUN AUTOMATE STEP#4 adjust the macaddress/Private IP and DNS Resolve Server addresses
+
+#- name: After above step, automate the Step #3 (adjust the macaddress/addresses) from “BM to VM” steps
+
+
+# RUN AUTOMATE STEP#5 Add PRIVATE IP to /etc/hosts file
+
+##### COMMENT 1
+##### DO NOT DO "NETPLAN APPLY" *****
+#- name: Execute shell to apply netplan 
+#  become: true
+#  shell: netplan apply
+
+##### COMMENT 3
+- name: Reboot host and wait for it to restart
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 120
+    test_command: ls -l
+
+##### COMMENT 2
+- name: "edit /etc/systemd/resolved.conf file to use localhost as DNS server"
+  lineinfile:
+      dest: /etc/systemd/resolved.conf
+      regexp: '^(.*)DNS(.*)$'
+      line: "DNS=127.0.0.1"
+      state: present
+      create: true
+
+##### COMMENT 1
+- name: Enable systemd-resolved and reload daemon
+  systemd:
+    name: systemd-resolved
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
+
+- name: Execute the command "systemd-resolve --status" and search for 127.0.0.1
+  shell: systemd-resolve --status | grep 127.0.0.1
+  register: output
+
+##- name: Modify /etc/netplan/*.yaml
+## replace:
+##    path:  "{{ item }}"
+##    regexp: 'ens3'
+##    replace: "eth0"
+##  with_fileglob:
+##    - "/etc/netplan/*"
+

@@ -1,0 +1,53 @@
+
+
+- name: get list of VMs
+  #vars:
+  #  ansible_python_interpreter: '/usr/bin/python'
+  virt:
+      command: "list_vms"
+  register: vms
+
+- name: Display VMs
+  shell: echo {{ item }}
+  with_items: "{{ vms.list_vms }}"
+
+- name: start vm
+  virt:
+      name: "{{ item }}"
+      state: running
+  with_items: "{{ vms.list_vms }}"
+
+- name: Change Directory
+  shell: chdir ~/ocp-install
+
+- name: check the existing partition information on the remote machine 
+  become: true
+  shell: df -Th
+
+- name: get the fdisk info on the remote machine 
+  become: true
+  shell: fdisk -l 
+
+- name: Run bootstrap
+  #shell: for i in {1..10};do echo \"Hi\";sleep 1;if [ $i -gt 3 ]; then echo \"Hello\";fi;done
+  #shell: for i in {1..30};do sleep 1;if [ $i -gt 3 ]; then echo Hello Its Complete;else echo Hello;fi;done >> /tmp/output.txt &
+  shell: while true; do  date; sleep 2; done > /tmp/output.txt &
+  register: bootstrap_status
+  until: bootstrap_status is successful 
+  retries: "{{ retries }}"
+  delay: "{{ delay }}"
+
+- name: Validate logs mesg
+  shell: cat /tmp/output.txt
+  register: output_status
+  until: '"12" in output_status.stdout'
+  retries: "{{ retries }}"
+  delay: "{{ delay }}"
+
+#- name: Restart gobetween
+#  systemd:
+#    state: restarted
+#    enabled: yes
+#    name: gobetween
+
+

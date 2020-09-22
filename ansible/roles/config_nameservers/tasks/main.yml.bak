@@ -1,0 +1,157 @@
+---
+# tasks file for nameservers
+
+- name: Ansible copy directory to the remote server
+  copy:
+      src: "{{ ansible_files_dir_local }}/files/"
+      dest: "{{ ansible_files_dir_remote }}/files/"
+
+
+# MODIFY
+# RUN AUTOMATE STEP#4 (Automation BM to VM)
+# Edit the existing file in /etc/netplan/*.yaml (as file name may vary) and update it with the content mentioned in the BM to VM simulation file cloud-init.yaml
+
+#- name: Remove if cloud-init.yaml exists in /etc/plan directory
+#  file: 
+#   path: /etc/plan/cloud-init.yaml
+#   state: absent
+#  ignore_errors: true
+
+#- name: Replace the file content
+#  shell: ls /etc/netplan/*.yaml
+#  register: filecontent
+
+#- name: Copy cloud-init.yaml
+#  copy:
+#   src: "{{ ansible_files_dir_local }}/files/cloud-init.yaml"
+#   dest: /etc/netplan
+  
+#- name: Replace
+#  command: cp /etc/netplan/cloud-init.yaml {{ item }}
+#  with_items: "{{ filecontent.stdout }}"
+
+#- name: Create a directory for backup
+#  file:
+#     path: /etc/netplan/netplan.backup
+#     state: directory
+
+
+# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
+# START
+- name: Get the file name
+  shell: "ls /etc/netplan/*.yaml"
+  register: filename
+
+- name: Copy file and set up the permission and owner of the file 
+  copy:
+    src: "{{ filename.stdout }}"
+    dest: "{{ filename.stdout }}.bak"
+    remote_src: yes
+    mode: 0755
+    force: no
+
+- debug: msg={{ filename.stdout }}
+
+#- name: Modify /etc/netplan/*.yaml 
+#  replace:
+#    path:  "{{ filename.stdout }}"
+#    regexp: 'ens3'
+#    replace: "eth0"
+
+#- name: Append extra content to /etc/netplan/*.yaml file
+#  shell: cat {{ ansible_files_dir_remote }}/files/cloud-01-init.yaml >> "{{ filename.stdout }}"
+# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
+# END
+
+- name: Ansible copy directory to the remote server
+  copy:
+      src: "{{ ansible_files_dir_remote }}/files/cloud-init.yaml"
+      dest: "{{ filename.stdout }}"
+      remote_src: yes
+
+
+##- name: Modify /etc/netplan/*.yaml
+## replace:
+##    path:  "{{ item }}"
+##    regexp: 'ens3'
+##    replace: "eth0"
+##  with_fileglob:
+##    - "/etc/netplan/*"
+
+- name: "edit /etc/systemd/resolved.conf file to use localhost as DNS server"
+  lineinfile:
+      dest: /etc/systemd/resolved.conf
+      regexp: '^(.*)DNS(.*)$'
+      line: "DNS=127.0.0.1"
+      state: present
+      create: true
+
+- name: Fetch IP address
+  shell: ip addr show ens3 | awk '/inet/ {print $2}' | cut -d/ -f1 | head -1
+  register: IP
+
+- name: Fetch mac address
+  shell: ip addr show ens3 | awk '/ether/ {print $2}' | cut -d/ -f1
+  register: MAC
+
+- name: Fetch DNS server address
+  shell: cat "{{ dns_server }}" | grep -v '^#' | grep nameserver | awk '{print $2}'
+  register: DNS
+
+- name: Set variables
+  set_fact:
+      HOST_IP_ADDRESS: "{{ IP.stdout }}"
+      HOST_MAC_ADDRESS: "{{ MAC.stdout }}"
+      HOST_DNS_ADDRESS: "{{ DNS.stdout }}"
+
+- name: "Replace IPaddress in network init file"
+  replace:
+      path: "{{ filename.stdout }}"
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+  with_items:
+      - { regexp: 'REPLACE_IPADDRESS', replace: "{{ HOST_IP_ADDRESS }}" }
+      - { regexp: 'REPLACE_MACADDRESS', replace: "{{ HOST_MAC_ADDRESS }}" }
+      - { regexp: 'REPLACE_DNSADDRESS', replace: "{{ HOST_DNS_ADDRESS }}" }
+  become: yes
+
+
+# RUN AUTOMATE STEP#4 adjust the macaddress/Private IP and DNS Resolve Server addresses
+
+#- name: After above step, automate the Step #3 (adjust the macaddress/addresses) from “BM to VM” steps
+
+
+# RUN AUTOMATE STEP#5 Add PRIVATE IP to /etc/hosts file
+
+- name: Execute shell to apply netplan 
+  become: true
+  shell: netplan apply
+
+
+# **** WORKING ******
+- name: Reboot host and wait for it to restart
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 120
+    test_command: ls -l
+
+
+- name: Execute a command using the shell module
+  shell: systemd-resolve --status
+  register: output
+  
+- name: Verify if IP Address 127.0.0.1 present
+  shell: "grep 127.0.0.1 {{ output.stdout }}"
+  register: ipaddress
+  when: "127.0.0.1" in ipaddress.stdout 
+
+- name: Enable systemd-resolved and reload daemon
+  systemd:
+    name: systemd-resolved
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
+

@@ -1,0 +1,64 @@
+[servers]
+[servers.api]
+protocol = "tcp"
+bind = "0.0.0.0:6443"
+
+[servers.api.discovery]
+  kind = "static"
+  static_list = [ "192.168.10.91:6443","192.168.10.92:6443","192.168.10.93:6443","192.168.10.152:6443" ]
+  
+[servers.api.healthcheck]
+  kind = "ping"
+  fails = 1
+  passes = 1
+  interval = "2s"
+  timeout="1s"
+  ping_timeout_duration = "500ms"
+  
+[servers.mcs]
+protocol = "tcp"
+bind = "0.0.0.0:22623"
+
+[servers.mcs.discovery]
+  kind = "static"
+  static_list = [ "192.168.10.91:22623","192.168.10.92:22623","192.168.10.93:22623","192.168.10.152:22623" ]
+  
+[servers.mcs.healthcheck]
+  kind = "ping"
+  fails = 1
+  passes = 1
+  interval = "2s"
+  timeout="1s"
+  ping_timeout_duration = "500ms"
+  
+[servers.http]
+protocol = "tcp"
+bind = "0.0.0.0:80"
+
+[servers.http.discovery]
+  kind = "static"
+  static_list = [ "192.168.10.30:80","192.168.10.31:80","192.168.10.32:80","192.168.10.33:80","192.168.10.34:80","192.168.10.35:80" ]
+  
+[servers.http.healthcheck]
+  kind = "ping"
+  fails = 1
+  passes = 1
+  interval = "2s"
+  timeout="1s"
+  ping_timeout_duration = "500ms"
+  
+[servers.https]
+protocol = "tcp"
+bind = "0.0.0.0:443"
+
+[servers.https.discovery]
+  kind = "static"
+  static_list = [ "192.168.10.30:443","192.168.10.31:443","192.168.10.32:443","192.168.10.33:443","192.168.10.34:443","192.168.10.35:443" ]
+  
+[servers.https.healthcheck]
+  kind = "ping"
+  fails = 1
+  passes = 1
+  interval = "2s"
+  timeout="1s"
+  ping_timeout_duration = "500ms"

@@ -1,0 +1,10 @@
+- name: pip
+  shell: pip install --upgrade pip
+
+- pip:
+    name: jsbeautifier
+
+- name: Run a script using an executable in a system path
+  script: ./update_vars.py
+  args:
+    executable: python3

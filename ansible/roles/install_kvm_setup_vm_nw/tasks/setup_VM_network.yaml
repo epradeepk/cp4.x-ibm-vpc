@@ -1,0 +1,24 @@
+- name: Ansible copy directory to the remote server
+  copy:
+      src: "{{ ansible_files_dir_local }}/files/net_ocp.xml"
+      dest: /root/net_ocp.xml
+
+- name: Create net_ocp.xml network, start it and have it autostart  
+  shell: "{{ item }}"
+  with_items:
+  - virsh net-define net_ocp.xml
+  - virsh net-autostart ocp
+  - virsh net-start ocp
+  ignore_errors: true
+
+- name: Make sure libvirtd service is running
+  systemd:
+    state: restarted
+    enabled: yes
+    name: libvirt-bin
+
+- name: Verify existence of network
+  shell: ifconfig  br-ocp
+  register: output
+  failed_when: '"192.168.10.1" not in output.stdout'
+

@@ -1,0 +1,24 @@
+- name: get VM disks
+  command: "ls {{ vm_location }}"
+  register: disks
+  changed_when: "disks.rc != 0"
+
+- name: get list of VMs
+  virt:
+      command: "list_vms"
+  register: vms 
+
+- name: create volumes
+  include_vars: vms.yml
+  command: >
+             virsh vol-create-as secondary {{ item.key }}.{{ item.value.file_type }} 10M
+  with_dict: "{{ guests }}"
+
+- name: create vm
+  command: >
+             virt-install --name={{ item.key }} --ram={{ item.value.mem }} --vcpus={{ item.value.cpus }} --mac={{ item.value.mac }} \
+             --disk path=/var/lib/secondary/libvirt/images/{{ item.key }}.{{ item.value.file_type }},bus=virtio \
+             --pxe --noautoconsole --graphics=vnc --hvm \
+             --network=bridge:br-ocp,model=virtio --boot hd,network --os-variant rhel7
+  with_dict: "{{ guests }}"
+

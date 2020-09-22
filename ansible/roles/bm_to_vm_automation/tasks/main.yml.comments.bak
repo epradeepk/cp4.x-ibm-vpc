@@ -1,0 +1,65 @@
+---
+
+# tasks file for vol
+
+# 1. What is the purpose these commands ? These outputs are not manually verified as its automation.
+- name: check the existing partition information on the remote machine 
+  become: true
+  shell: df -Th
+
+- name: get the fdisk info on the remote machine 
+  become: true
+  shell: fdisk -l 
+
+#     2. How would we know that the block storage file system is /dev/sdb, as below code tries to format /dev/sdb ? In my testing it was  /dev/vdd
+
+- name: make the file system  on the remote machine 
+  become: true
+  shell: mkfs.ext4 /dev/vda2
+
+- name: "create directory if they dont exist to mount a volume  "
+  file:
+    path: /mnt/secondary
+    state: directory
+    owner: root
+    group: root
+   mode: 0775
+
+
+- name: To find the UUID of the partition 
+  become: true
+  shell: blkid /dev/sdb -sUUID -ovalue
+  register: UUID 
+
+- name: Add mount to /etc/fstab
+  lineinfile:
+    dest: /etc/fstab
+    line: '/dev/disk/by-uuid/{{UUID.stdout}} /mnt/secondary ext4 defaults 0 0'
+
+- name: Ensure items in /etc/fstab are mounted
+  shell: mount -a 
+
+- name: check the existing partition information on the remote machine 
+  become: true
+  shell: df -Th
+
+- name: moun the extenal volume to the directory  on the remote machine 
+  become: true
+  shell: virsh pool-list
+
+- name: moun the extenal volume to the directory  on the remote machine 
+  become: true
+  shell: virsh pool-define-as --name secondary --type dir --target /mnt/secondary
+
+- name: moun the extenal volume to the directory  on the remote machine 
+  become: true
+  shell: virsh pool-autostart secondary 
+
+- name: moun the extenal volume to the directory  on the remote machine 
+  become: true
+  shell: virsh pool-start secondary
+
+- name: moun the extenal volume to the directory  on the remote machine 
+  become: true
+  shell: virsh pool-list
+
