@@ -16,7 +16,7 @@ Use ONLY for the purpose of Proof of Concept(PoC) or as your Development environ
 A VPC, VSI (referred to as `base VSI`), Subnets, Floating-IP on `VPC-Gen 2` is provisioned with the required [resource configurations](https://docs.openshift.com/container-platform/4.5/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) as illustrated in the figure, for installing OCP 4.x. 
 In addition, a Block Storage is provisioned and attached to the `base VSI`.
 
-![reference solution](https://github.ibm.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/overall_design.png) <br>
+![reference solution](https://github.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/overall_design.png) <br>
 (the text in `orange` color is used as resource-names in the terraform / ansible template)
 
 Refer to [OpenShift Container Platform 4.5](https://docs.openshift.com/container-platform/4.5/welcome/index.html) for more details about the OCP 4.x infrastructure design.
@@ -27,7 +27,7 @@ Multiple VMs (refered to as `ocp VMs`) are provisioned in the `base VSI` to depl
 * three masters, and 
 * two workers. 
 
-![reference solution](https://github.ibm.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/basevm.png)
+![reference solution](https://github.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/basevm.png)
 
 Additional components deployed in the `base VSI` are as follows:
 
@@ -142,14 +142,14 @@ Example output where the OCP 4.x access information is provided: <br>
 
 ## OCP 4.x Console
 ---
-![reference solution](https://github.ibm.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/OCP4.5_Console.png)
+![reference solution](https://github.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/OCP4.5_Console.png)
 
 
 ---
  
 ## OCP 4.x Dashboard
 ---
-![reference solution](https://github.ibm.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/OCP4.5_Dashboard.png)
+![reference solution](https://github.com/epradeepk/ocp4.x-ibm-vpc/blob/master/diagrams/OCP4.5_Dashboard.png)
 
 ---
 
