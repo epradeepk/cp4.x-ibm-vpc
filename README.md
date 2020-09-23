@@ -77,14 +77,14 @@ Install the prerequisites, clone this GitHub Repo to your local system (director
 
 When you are creating the `base VSI`, you must enter the following values as inputs:
 
-  * `ssh_public_key` : Enter the public ssh key (to access your `base VSI`) in `ssh_public_key` file in the cloned GitHub Repo code
+  * `ssh_public_key` : Enter the public ssh key (to access your `base VSI`) in `terraform/ssh_public_key` file in the cloned code
   * `ibmcloud_api_key`: Set the API key to access IBM Cloud VPC Gen2 infrastructure using command
     ```export IC_API_KEY=<API-KEY-VALUE>``` on command line interface terminal
     For more information for how to create an API key and retrieve it, see [Managing classic infrastructure API keys](https://cloud.ibm.com/docs/iam?topic=iam-classic_keys)
   * `Volume name`:  Enter the desired Block Storage Volume name
   * `Cluster name`: Enter the desired Cluster name 
   * `Domain name`:  Enter the desired Domain name
-  * `Pull Secret`:  Enter the Pull Secret key in `pull_secret` file in the cloned GitHub Repo code. Get it from Red Hat website as explained in Prerequisites.
+  * `Pull Secret`:  Enter the Pull Secret key in `terraform/pull_secret` file in the cloned code. Get it from Red Hat website as explained in Prerequisites.
   
 You can also choose to customize the default settings for your `base VSI`:
 
