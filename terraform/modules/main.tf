@@ -69,76 +69,14 @@ output sshcommand {
   value = "ssh root@${ibm_is_floating_ip.ocp43fip.address}"
 }
 
-# Enable Ingress/Inbound ssh on port 22
-resource "ibm_is_security_group_rule" "ocp43_ingress_ssh_all1" {
+resource "ibm_is_security_group_rule" "ocp45_ingress_rule" {
   group     = "${ibm_is_security_group.ocp43sg.id}"
   direction = "inbound"
-  remote    = "0.0.0.0/0"                     
-
-  tcp = {
-    port_min = 22
-    port_max = 22
-  }
-}
-
-# Enable Ingress/Inbound on port 80 for http
-resource "ibm_is_security_group_rule" "ocp43_ingress_http" {
-  group     = "${ibm_is_security_group.ocp43sg.id}"
-  direction = "inbound"
-  remote    = "0.0.0.0/0" 
-
-  tcp = {
-    port_min = 80
-    port_max = 80
-  }
-}
-
-
-# Enable Ingress/Inbound on port 443 for https
-resource "ibm_is_security_group_rule" "ocp43_egress_https" {
-  group     = "${ibm_is_security_group.ocp43sg.id}"
-  direction = "outbound"
-  #remote    = "${ibm_is_security_group.sg1.id}"
   remote    = "0.0.0.0/0"
-
-  tcp = {
-    port_min = 443
-    port_max = 443
-  }
 }
 
-# Enable egress/outbound on port 80 for http
-resource "ibm_is_security_group_rule" "ocp43_egress_http" {
+resource "ibm_is_security_group_rule" "ocp45_outgress_rule" {
   group     = "${ibm_is_security_group.ocp43sg.id}"
   direction = "outbound"
   remote    = "0.0.0.0/0"
-
-  tcp = {
-    port_min = 80
-    port_max = 80
-  }
 }
-
-# Enable egress/outbound on port 53 for DNS
-resource "ibm_is_security_group_rule" "ocp43_egress_dns_tcp" {
-  group     = "${ibm_is_security_group.ocp43sg.id}"
-  direction = "outbound"
-  remote    = "0.0.0.0/0"
-
-  tcp = {
-    port_min = 53
-    port_max = 53
-  }
-}
-
-resource "ibm_is_security_group_rule" "ocp43_egress_dns_udp" {
-  group     = "${ibm_is_security_group.ocp43sg.id}"
-  direction = "outbound"
-  remote    = "0.0.0.0/0"
-
-  udp = {
-    port_min = 53
-    port_max = 53
-  }
-}
-
