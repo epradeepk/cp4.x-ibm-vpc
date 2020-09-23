@@ -1,7 +1,6 @@
 variable "profile" {
   	description = "Virtual Server Instance Profile"
-  	#default = "cc1-2x4"
-  	default = "bx2-2x8"
+  	default = "bx2-32x128"
 }
 
 variable "resource_group_name" {
@@ -11,18 +10,17 @@ variable "resource_group_name" {
 
 variable "vpc_name" {
 	description = "VPC Name"
-        default = "tf-vpc2-ocp43-vpc-auto2"
+        default = "ocp45-vpc-gen2"
 }
 
 variable "basename" {
   	description = "Prefix used for all resource names"
-  	default = "tf-vpc2-ocp43-auto2"
+  	default = "ocp45-vpc-gen2-basename"
 }
 
 variable "subnet_zone" {
 	description = "Prefix used for all resource names"
  	default = "eu-de-1"
-	#default = "us-south-1"
 }
 
 variable "region" {
@@ -32,7 +30,7 @@ variable "region" {
 
 variable "ssh_keyname" {
 	description = "SSH Keyname to allow access to VSI"
-  	default = "ssh-key-ocp43"
+  	default = "ssh-key-ocp45-name"
 }
 
 variable "image" {
@@ -41,7 +39,7 @@ variable "image" {
 }
 
 variable "volume_name" {
-	description = "Block Storage"
+	description = "OCP4.5 Block Storage"
 }
 
 variable "ocp43-domain-name" {
@@ -54,6 +52,6 @@ variable "ocp43-cluster-name" {
 
 variable "ssh_public_key" {
         description = "SSH public key"
-        default = "ssh-key-ocp43-auto"
+        default = "ssh-key-ocp45"
 }
 

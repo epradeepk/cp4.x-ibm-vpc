@@ -1,10 +1,14 @@
 - name: pip
   shell: pip install --upgrade pip
+  ignore_errors: true
 
-- pip:
+- pip: 
     name: jsbeautifier
+  ignore_errors: true
 
 - name: Run a script using an executable in a system path
   script: ./update_vars.py
   args:
     executable: python3
+  ignore_errors: true
+

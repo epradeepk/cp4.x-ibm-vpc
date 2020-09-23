@@ -53,7 +53,7 @@ Additional components deployed in the `base VSI` are as follows:
   2. Terraform Command Line Interface (CLI) (Refer to Annexure section for detailed installation steps)
 * Domain registration and configuration in IBM Cloud
   1. [Registering a new domain](https://cloud.ibm.com/docs/dns?topic=dns-register-a-new-domain)
-     Or an existing domain can be used
+     Or use an existing domain 
   2. [Configuring DNS records](https://cloud.ibm.com/docs/cis?topic=cis-set-up-your-dns-for-cis)
 
       | Record Type | Host Value         |  Points to             |
@@ -71,20 +71,20 @@ The OCP 4.x installation on `IBM Cloud VPC Gen2` includes below steps <br>
 2. Install OCP 4.x on `base VSI`
 
 ### 1. Set up `base VSI` 
-Install the prerequisites, clone this GitHub Repo to your local system (directory: `<BASE-DIRECTORY>/ocp4.x-ibm-vpc`) and create a `base VSI` using below steps. As an alternative, if you want to use an existing `base VSI`, you can move to `Annexure` - `Install OCP 4.x on an existing base VSI` section for the installation steps.
+Install the prerequisites, clone this GitHub Repo to your local system (directory: `<BASE-DIRECTORY>/ocp4.x-ibm-vpc`) and create a `base VSI` using below steps. As an alternative, if you want to use an existing `base VSI`, go to `Annexure` - `Install OCP 4.x on an existing base VSI` section for the installation steps.
 
 #### Inputs
 
 When you are creating the `base VSI`, you must enter the following values as inputs:
 
-  * `ssh_public_key` : Enter a public ssh key (that you want use to access your `base VSI`) in `ssh_public_key` file
-  * `ibmcloud_api_key:` Enter the API key to access IBM Cloud VPC Gen2 infrastructure using command
+  * `ssh_public_key` : Enter the public ssh key (to access your `base VSI`) in `ssh_public_key` file in the cloned GitHub Repo code
+  * `ibmcloud_api_key`: Set the API key to access IBM Cloud VPC Gen2 infrastructure using command
     ```export IC_API_KEY=<API-KEY-VALUE>``` on command line interface terminal
     For more information for how to create an API key and retrieve it, see [Managing classic infrastructure API keys](https://cloud.ibm.com/docs/iam?topic=iam-classic_keys)
-  * `Volume name`: Enter the desired Block Storage Volume name
+  * `Volume name`:  Enter the desired Block Storage Volume name
   * `Cluster name`: Enter the desired Cluster name 
-  * `Domain name`: Enter the desired Domain name
-  * `Pull Secret`: Enter Pull Secret key in `pull_secret` file. Get it from Red Hat website as explained in Prerequisites
+  * `Domain name`:  Enter the desired Domain name
+  * `Pull Secret`:  Enter the Pull Secret key in `pull_secret` file in the cloned GitHub Repo code. Get it from Red Hat website as explained in Prerequisites.
   
 You can also choose to customize the default settings for your `base VSI`:
 

@@ -1,20 +1,20 @@
-- hosts: all
-#- hosts: local_host
-#  roles:
-#  - install_packages_locally
-
-#- hosts: remote_host
+- hosts: local_host
   roles:
 
-  # TESTING
-  #- prepare_host
-  #- install_kvm_setup_vm_nw
-  #- install_dnsmasq
-  #- config_nameservers
-  #- matchbox_setup
-  #- openshift_installer_install_setup
-  #- bm_to_vm_automation
-  #- vm_create
-  #- load_balancer
+  - install_packages_locally
+  
+- hosts: remote_host
+  roles:
+
+  - prepare_host
+  - install_kvm_setup_vm_nw
+  - install_dnsmasq
+  - config_nameservers
+  - matchbox_setup
+  - openshift_installer_install_setup
+  - bm_to_vm_automation
+  - vm_create
+  - load_balancer
   - bootstrap_process
   - openshift_install
+

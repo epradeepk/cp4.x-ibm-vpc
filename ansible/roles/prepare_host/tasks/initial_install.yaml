@@ -2,6 +2,7 @@
   script: ./update_vars.py
   args:
     executable: python3
+  ignore_errors: true
 
 - name: Update and upgrade apt packages
   become: true
