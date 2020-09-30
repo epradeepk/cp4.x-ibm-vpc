@@ -11,7 +11,7 @@ ssh_key: "REPLACE_SSH_PUBLIC_KEY"
 
 # For VMs created from cloud UI - block_storage: "/dev/vdb"
 # For VMs created from terraform - block_storage: "/dev/vdd"
-block_storage: "/dev/vdb"
+block_storage: "/dev/vdd"
 
 delay: 5
 retries: 5
