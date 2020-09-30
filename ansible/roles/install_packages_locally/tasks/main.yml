@@ -9,6 +9,6 @@
 - name: Run a script using an executable in a system path
   script: ./update_vars.py
   args:
-    executable: python3
+    executable: python
   ignore_errors: true
 
