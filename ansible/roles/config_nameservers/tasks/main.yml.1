@@ -1,6 +1,0 @@
-- name: Execute a command using the shell module
-  shell: systemd-resolve --status | grep 127.0.0.23
-  register: output
-
-- debug: msg="{{ output.stdout_lines }}"
-  
