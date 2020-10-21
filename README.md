@@ -62,6 +62,7 @@ Additional components deployed in the `base VSI` are as follows:
       | CNAME       | *.apps.mycluster   | mycluster.example.com  |
       | CNAME       | api.mycluster      | mycluster.example.com  |
       | CNAME       | api-int.mycluster  | mycluster.example.com  |
+      | CNAME       | matchbox.mycluster | mycluster.example.com  |
 
 
 ## Usage
