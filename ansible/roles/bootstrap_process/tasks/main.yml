@@ -60,7 +60,7 @@
     state: absent
 
 - name: Run bootstrap
-  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete &"
+  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug &"
 #  register: bootstrap_status
 #  until: bootstrap_status is successful 
 #  retries: "{{ retries }}"
