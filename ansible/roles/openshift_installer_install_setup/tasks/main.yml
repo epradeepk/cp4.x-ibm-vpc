@@ -90,7 +90,6 @@
     path: "{{ ocp_install_install_dir }}/install-config.yaml"
     regexp: BASE-VM-SSH-PUBLIC-KEY
     replace: "{{ sshkey.stdout }}"
-  #with_items: "{{ sshkey.stdout }}"
 
 - debug: msg="echo {{ sshkey.stdout }}"
 
@@ -104,7 +103,6 @@
 
 - name: Add domain name to install-config.yaml
   replace:
-    #path:  "{{ ansible_files_dir_remote }}/files/install-config.yaml"
     path: "{{ ocp_install_install_dir }}/install-config.yaml"
     regexp: 'mycluster'
     replace: "{{ cluster_name }}"
@@ -118,10 +116,19 @@
   become: true
 
 - name: Remove previous ignition files if any
+  find:
+    path: "{{ matchbox_files_dir }}/ignition/"
+    hidden: true
+    file_type: any
+  changed_when: false
+  register: collected_fsitems
+
+- name: Remove all fs items inside dir
   file:
-     path: "{{ matchbox_files_dir }}/ignition/*"
-     state: absent
-  ignore_errors: true
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ collected_fsitems.files }}"
+  when: collected_fsitems.matched|int != 0
 
 - name: Copy ignition-configs files
   copy:
