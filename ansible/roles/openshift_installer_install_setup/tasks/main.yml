@@ -58,11 +58,6 @@
        - "openshift-install"
   become: yes
 
-#### Debug 1
-#- name: Ansible copy directory to the remote server
-#  copy:
-#      src: "{{ ansible_files_dir_local }}/files/"
-#      dest: "{{ ansible_files_dir_remote }}/files/"
 
 - name: Copy openshift config file
   copy:
@@ -115,7 +110,6 @@
     replace: "{{ cluster_name }}"
 
 
-### COMMENT 1
 - name: Execute a command using the shell module
   shell: openshift-install create ignition-configs
   args:
@@ -123,23 +117,15 @@
       executable: /bin/bash
   become: true
 
+- name: Remove previous ignition files if any
+  file:
+     path: "{{ matchbox_files_dir }}/ignition/*"
+     state: absent
+  ignore_errors: true
 
-### COMMENT 2
 - name: Copy ignition-configs files
   copy:
       src: "{{ ocp_install_install_dir }}/"
       dest: "{{ matchbox_files_dir }}/ignition/"
       remote_src: yes
   become: yes
-
-#- name: Remove unwanted directories
-#  file:
-#       path: "{{ item }}"
-#       state: absent
-#  with_items:
-#       - "{{ matchbox_files_dir }}/ignition/auth"
-#       - "{{ matchbox_files_dir }}/ignition/metadata.json"
-#       - "/root/openshift_client"
-#       - "/root/openshift-install"
-#       - "/root/ocp-install"
-
