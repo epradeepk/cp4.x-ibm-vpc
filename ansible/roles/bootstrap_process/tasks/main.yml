@@ -5,18 +5,17 @@
       command: "list_vms"
   register: vms
 
-#- name: Display VMs
-#  shell: echo {{ item }}
-#  with_items: "{{ vms.list_vms }}"
+- name: Display VMs
+  shell: echo {{ item }}
+  with_items: "{{ vms.list_vms }}"
 
-#- name: "Remove file vms_state.txt"
-#  file:
-#    path: /root/vms_state.txt
-#    state: absent
+- name: "Remove file vms_state.txt"
+  file:
+    path: /root/vms_state.txt
+    state: absent
 
 # Wait for 10 mins to see if VMs will go to shut off state
-#- include_tasks: vms_state.yml 
-
+- include_tasks: vms_state.yml 
 
 - name: stop vm if not already stopped by itself
   vars:
