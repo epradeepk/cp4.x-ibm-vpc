@@ -47,24 +47,14 @@
       state: running
   with_items: "{{ vms.list_vms }}"
 
-#- name: Run bootstrap
-#  shell: while true; do  date; sleep 2; done > /tmp/output.txt &
-#  register: bootstrap_status
-#  until: bootstrap_status is successful 
-#  retries: "{{ retries }}"
-#  delay: "{{ delay }}"
-
 - name: "Remove file /root/ocp-install/.openshift_install.log"
   file:
     path: /root/ocp-install/.openshift_install.log
     state: absent
 
-- name: Run bootstrap
-  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug &"
-#  register: bootstrap_status
-#  until: bootstrap_status is successful 
-#  retries: "{{ retries }}"
-#  delay: "{{ delay }}"
+- name: Run bootstrap - NOTE: THIS STEP WILL TAKE Approx 30+ mins to complete
+  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug "
+
 
 - name: Validate logs mesg
   shell: cat /root/ocp-install/.openshift_install.log
@@ -73,12 +63,4 @@
   retries: "{{ bootstrap_status_wait_retries }}"
   delay: "{{ bootstrap_status_wait_delay }}"
   ignore_errors: true
-
-
-#- name: Validate logs mesg
-#  shell: cat /tmp/output.txt
-#  register: output_status
-#  until: '"Tue Jun 23 10:15:" in output_status.stdout'
-#  retries: "{{ retries }}"
-#  delay: "{{ delay }}"
-
+  
