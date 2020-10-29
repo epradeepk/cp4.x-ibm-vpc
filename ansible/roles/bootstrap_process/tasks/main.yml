@@ -53,7 +53,7 @@
     state: absent
 
 - name: Run bootstrap - NOTE: THIS STEP WILL TAKE Approx 30+ mins to complete
-  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug "
+  shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug"
 
 
 - name: Validate logs mesg
