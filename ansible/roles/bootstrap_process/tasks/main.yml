@@ -62,5 +62,5 @@
   until: '"Bootstrap status: complete" in output_status.stdout'
   retries: "{{ bootstrap_status_wait_retries }}"
   delay: "{{ bootstrap_status_wait_delay }}"
-  ignore_errors: true
+
   
