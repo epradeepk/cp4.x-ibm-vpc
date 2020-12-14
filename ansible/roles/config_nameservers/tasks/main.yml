@@ -1,44 +1,6 @@
 ---
 # tasks file for nameservers
 
-####### Debug 1
-#- name: Ansible copy directory to the remote server
-#  copy:
-#      src: "{{ ansible_files_dir_local }}/files/"
-#      dest: "{{ ansible_files_dir_remote }}/files/"
-
-
-# MODIFY
-# RUN AUTOMATE STEP#4 (Automation BM to VM)
-# Edit the existing file in /etc/netplan/*.yaml (as file name may vary) and update it with the content mentioned in the BM to VM simulation file cloud-init.yaml
-
-#- name: Remove if cloud-init.yaml exists in /etc/plan directory
-#  file: 
-#   path: /etc/plan/cloud-init.yaml
-#   state: absent
-#  ignore_errors: true
-
-#- name: Replace the file content
-#  shell: ls /etc/netplan/*.yaml
-#  register: filecontent
-
-#- name: Copy cloud-init.yaml
-#  copy:
-#   src: "{{ ansible_files_dir_local }}/files/cloud-init.yaml"
-#   dest: /etc/netplan
-  
-#- name: Replace
-#  command: cp /etc/netplan/cloud-init.yaml {{ item }}
-#  with_items: "{{ filecontent.stdout }}"
-
-#- name: Create a directory for backup
-#  file:
-#     path: /etc/netplan/netplan.backup
-#     state: directory
-
-
-# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
-##### START
 - name: Get the file name
   shell: "ls /etc/netplan/*.yaml"
   register: filename
@@ -62,9 +24,6 @@
 - name: Append extra content to /etc/netplan/*.yaml file
   #shell: cat {{ ansible_files_dir_remote }}/files/cloud-01-init.yaml >> "{{ filename.stdout }}"
   shell: 'if grep eth0 {{ filename.stdout }}; then true; else cat {{ ansible_files_dir_remote }}/files/cloud-01-init.yaml >> {{ filename.stdout }};fi'
-
-# ***** MODIFY THE EXISTING /etc/netplan/*.yaml ***********
-###### END
 
 - name: Ansible copy  cloud-init.yaml to the remote server
   copy:
@@ -125,25 +84,9 @@
       - { regexp: 'REPLACE_DNSADDRESS', replace: "{{ HOST_DNS_ADDRESS }}" }
   become: yes
 
-###### Debug 123
 - name: Add Private IP to /etc/hosts file
-  #shell: 'echo  "{{ HOST_IP_ADDRESS }}" "{{ host_name }}" >> /etc/hosts'
   shell: 'if grep "{{ host_name }}" /etc/hosts; then true; else echo   "{{ HOST_IP_ADDRESS }}"  "{{ host_name }}" >> /etc/hosts;fi'
 
-# RUN AUTOMATE STEP#4 adjust the macaddress/Private IP and DNS Resolve Server addresses
-
-#- name: After above step, automate the Step #3 (adjust the macaddress/addresses) from “BM to VM” steps
-
-
-# RUN AUTOMATE STEP#5 Add PRIVATE IP to /etc/hosts file
-
-##### COMMENT 1
-##### DO NOT DO "NETPLAN APPLY" *****
-#- name: Execute shell to apply netplan 
-#  become: true
-#  shell: netplan apply
-
-##### COMMENT 3
 - name: Reboot host and wait for it to restart
   reboot:
     msg: "Reboot initiated by Ansible"
@@ -153,7 +96,6 @@
     post_reboot_delay: 120
     test_command: ls -l
 
-##### COMMENT 2
 - name: "edit /etc/systemd/resolved.conf file to use localhost as DNS server"
   lineinfile:
       dest: /etc/systemd/resolved.conf
@@ -162,7 +104,6 @@
       state: present
       create: true
 
-##### COMMENT 1
 - name: Enable systemd-resolved and reload daemon
   systemd:
     name: systemd-resolved
@@ -174,11 +115,8 @@
   shell: systemd-resolve --status | grep 127.0.0.1
   register: output
 
-##- name: Modify /etc/netplan/*.yaml
-## replace:
-##    path:  "{{ item }}"
-##    regexp: 'ens3'
-##    replace: "eth0"
-##  with_fileglob:
-##    - "/etc/netplan/*"
-
+- name: Enable dnsmasq and reload daemon
+  systemd:
+    name: dnsmasq
+    state: restarted
+    enabled: yes

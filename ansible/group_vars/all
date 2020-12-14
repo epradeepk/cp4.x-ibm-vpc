@@ -35,17 +35,17 @@ matchbox_executable_dir: /usr/local/bin/
 matchbox_files_dir: /var/lib/matchbox
 matchbox_ocp_files_dir: "{{ ansible_env.HOME }}/ocp4x-on-ibm-public-cloud/files/matchbox"
 
-rcos_initramfs_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-installer-initramfs.x86_64.img"
-rcos_kernel_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-installer-kernel-x86_64"
-rcos_metal_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/latest/rhcos-4.5.6-x86_64-metal.x86_64.raw.gz"
+rcos_initramfs_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-installer-initramfs.x86_64.img"
+rcos_kernel_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-installer-kernel-x86_64"
+rcos_metal_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-metal.x86_64.raw.gz"
 
-openshift_client_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.5/openshift-client-linux.tar.gz"
+openshift_client_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.5/openshift-client-linux.tar.gz"
 
 openshift_client_dir: "/root/openshift_client"
 openshift_install_dir: "/root/openshift-install"
 ocp_install_install_dir: "/root/ocp-install"
 openshift_executable_dir: /usr/local/bin/
-openshift_linux_installer_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest-4.5/openshift-install-linux.tar.gz"
+openshift_linux_installer_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.5/openshift-install-linux.tar.gz"
 ocp_install_config: "/root/ocp4x-on-ibm-public-cloud/files"
 
 ocp_files: "/root/ocp4x-on-ibm-public-cloud/files"

@@ -3,7 +3,7 @@
     path: /root/ocp-install/.openshift_install.log
     state: absent
 
-- name: Run INSTALL
+- name: Run INSTALL - NOTE: THIS STEP MAY TAKE Approx 30+ mins to complete
   shell: "cd ~/ocp-install;openshift-install --dir=. wait-for install-complete"
 
 - name: Validate logs mesg
