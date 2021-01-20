@@ -51,7 +51,7 @@
     path: /root/ocp-install/.openshift_install.log
     state: absent
 
-- name: Run bootstrap - NOTE: THIS STEP WILL TAKE Approx 30+ mins to complete
+- name: Run bootstrap - NOTE THIS STEP WILL TAKE Approx 30+ mins to complete
   shell: "cd ~/ocp-install;openshift-install --dir=. wait-for bootstrap-complete --log-level=debug"
 
 
